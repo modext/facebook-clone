@@ -3,9 +3,11 @@ import Image from 'next/image'
 import {EmojiHappyIcon } from "@heroicons/react/outline";
 import { CameraIcon, VideoCameraIcon }  from "@heroicons/react/solid"
 import { useRef, useState } from 'react';
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import "firebase/firestore"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 } from 'uuid';
 
 
 
@@ -17,32 +19,45 @@ function InputBox() {
     const [imageToPost, setImageToPost] = useState(null)
 
     
+    const uploadImage=()=>{
 
-    const sendPost = (e) => {
+        if (imageToPost == null) return;
+        const imageRef = ref(storage, `down-images/${imageToPost.name  + v4()}`);
+        uploadBytes(imageRef, imageToPost).then(()=>{
+            alert("image Uploaded")
+        })
+    }
+    const sendPost = async (e) => {
         e.preventDefault();
         if (!inputRef.current.value) return;
+        uploadImage();
 
-       
+        //  if (imageToPost){
+        //      const storageRef = ref(storage, `up-Images/${imageToPost.name + v4()}`)
+        //      uploadBytes(storageRef,imageToPost).then(()=>{
+        //          alert('image uploaded 2')
+        //      })
+            
+        //  }
+        
+        
         const dbRef = collection(db, "posts");
-
-
         const data = {
             message: inputRef.current.value,
             name: session.user.name,
             email: session.user.email,
             image: session.user.image,
             timestamp: serverTimestamp()
-          };
-
-
-
+        };   
             addDoc(dbRef, data)
-            .then(docRef => {
+            .then((doc) => {
                 console.log("Document has been added successfully");
             })
             .catch(error => {
                 console.log(error);
             })
+
+
 
         inputRef.current.value ="";
         
@@ -107,7 +122,7 @@ function InputBox() {
                 <p className='text-xs sm:text-sm xl:text-base'>
                     Photo/VIdeo
                 </p>
-                <input ref={filepickerRef} onChange={addImageToPost} type="file" hidden />
+                <input ref={filepickerRef} onChange={addImageToPost}type="file" hidden />
             </div>
 
             <div className=' inputIcon'>
@@ -116,6 +131,10 @@ function InputBox() {
                     Feeling/Activity 
                 </p>
             </div>
+        </div>
+        <div>
+            <input type="file" onChange={(e)=>{setImageToPost(e.target.files[0])}} />
+            <button onClick={uploadImage}>Upload Image</button>
         </div>
     </div>
   )
