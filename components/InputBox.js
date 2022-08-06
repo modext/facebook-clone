@@ -8,6 +8,7 @@ import "firebase/firestore"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from 'uuid';
+import { doc, setDoc } from "firebase/firestore"; 
 
 
 
@@ -27,20 +28,10 @@ function InputBox() {
             alert("image Uploaded")
         })
     }
-    const sendPost = async (e) => {
+    const sendPost = (e) => {
         e.preventDefault();
         if (!inputRef.current.value) return;
-        uploadImage();
-
-        //  if (imageToPost){
-        //      const storageRef = ref(storage, `up-Images/${imageToPost.name + v4()}`)
-        //      uploadBytes(storageRef,imageToPost).then(()=>{
-        //          alert('image uploaded 2')
-        //      })
-            
-        //  }
-        
-        
+       
         const dbRef = collection(db, "posts");
         const data = {
             message: inputRef.current.value,
@@ -49,17 +40,26 @@ function InputBox() {
             image: session.user.image,
             timestamp: serverTimestamp()
         };   
-            addDoc(dbRef, data)
-            .then((doc) => {
-                console.log("Document has been added successfully");
-            })
-            .catch(error => {
-                console.log(error);
-            })
-
-
+        addDoc(dbRef, data)
+        .then((document) => {
+            if (imageToPost) {
+                const storageRef = ref(storage, `down-images/${imageToPost.name  + v4()}`);
+                uploadBytes(storageRef, imageToPost, "data_url").then((snapshot) => {
+                    getDownloadURL(snapshot.ref).then((URL) => {
+                        setDoc(
+                            doc(db, "posts", document.id),
+                            { postImage: URL },
+                            { merge: true }
+                        );
+                        console.log("File available at ", URL);
+                    });
+                    removeImage();
+                });
+            }
+        });
 
         inputRef.current.value ="";
+
         
     }
 
