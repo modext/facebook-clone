@@ -8,7 +8,8 @@ import "firebase/firestore"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from 'uuid';
-import { doc, setDoc } from "firebase/firestore"; 
+import { doc, setDoc, onSnapshot } from "firebase/firestore"; 
+import {uploadString} from "@firebase/storage"
 
 
 
@@ -23,8 +24,8 @@ function InputBox() {
     const uploadImage=()=>{
 
         if (imageToPost == null) return;
-        const imageRef = ref(storage, `down-images/${imageToPost.name  + v4()}`);
-        uploadBytes(imageRef, imageToPost).then(()=>{
+        const imageRef = ref(storage, `down-images/${imageToPost.name}`);
+        uploadString(imageRef, imageToPost).then(()=>{
             alert("image Uploaded")
         })
     }
@@ -43,9 +44,15 @@ function InputBox() {
         addDoc(dbRef, data)
         .then((document) => {
             if (imageToPost) {
-                const storageRef = ref(storage, `down-images/${imageToPost.name  + v4()}`);
-                uploadBytes(storageRef, imageToPost, "data_url").then((snapshot) => {
-                    getDownloadURL(snapshot.ref).then((URL) => {
+                const storageRef = ref(storage, `down-images/${document.id}`);
+                const uploadTask = uploadString(storageRef, imageToPost, "data_url");
+                alert("image Uploaded");
+                uploadTask.onSnapshot(dbRef.STATE_CHANGED,
+                    (error) => {
+                        alert(error);
+                    },
+                    () => {
+                            getDownloadURL(uploadTask.snapshot.ref).then((URL) => {
                         setDoc(
                             doc(db, "posts", document.id),
                             { postImage: URL },
@@ -55,8 +62,26 @@ function InputBox() {
                     });
                     removeImage();
                 });
+                // .then((document) => {
+                //     if (imageToPost) {
+                //         const storageRef = ref(storage, `down-images/${document.id}`);
+                //         uploadString(storageRef, imageToPost, "data_url").then((snapshot) => {
+                //             alert("image Uploaded");
+                //             getDownloadURL(snapshot.ref).then((URL) => {
+                //                 setDoc(
+                //                     doc(db, "posts", document.id),
+                //                     { postImage: URL },
+                //                     { merge: true }
+                //                 );
+                //                 console.log("File available at ", URL);
+                //             });
+                //             removeImage();
+                //         });
+                //     }
+                // });
             }
-        });
+        })
+        
 
         inputRef.current.value ="";
 
@@ -64,6 +89,9 @@ function InputBox() {
     }
 
     const addImageToPost = (e)=>{
+        console.log(e.target.value.name)
+        console.log(e.target.value.id)
+        console.log(e.target.value)
         const reader = new FileReader();
         if (e.target.files[0]){
             reader.readAsDataURL(e.target.files[0])
@@ -71,6 +99,7 @@ function InputBox() {
         reader.onload = (readerEvent) => {
             setImageToPost(readerEvent.target.result)
         }
+        
     };
 
     const removeImage =()=>{
