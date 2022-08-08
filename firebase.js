@@ -36,6 +36,7 @@ const app = initializeApp(firebaseConfig);
 
 // const db = app.firestore();
 const db = getFirestore(app);
+
 // const storage = firebase.storage;
 const storage = getStorage(app);
 
