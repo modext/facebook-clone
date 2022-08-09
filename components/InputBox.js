@@ -45,14 +45,9 @@ function InputBox() {
         .then((document) => {
             if (imageToPost) {
                 const storageRef = ref(storage, `down-images/${document.id}`);
-                const uploadTask = uploadString(storageRef, imageToPost, "data_url");
-                alert("image Uploaded");
-                uploadTask.onSnapshot(dbRef.STATE_CHANGED,
-                    (error) => {
-                        alert(error);
-                    },
-                    () => {
-                            getDownloadURL(uploadTask.snapshot.ref).then((URL) => {
+                uploadString(storageRef, imageToPost, "data_url").then((snapshot) => {
+                    alert("image Uploaded");
+                    getDownloadURL(snapshot.ref).then((URL) => {
                         setDoc(
                             doc(db, "posts", document.id),
                             { postImage: URL },
@@ -62,12 +57,19 @@ function InputBox() {
                     });
                     removeImage();
                 });
+            }
+        });
                 // .then((document) => {
                 //     if (imageToPost) {
                 //         const storageRef = ref(storage, `down-images/${document.id}`);
-                //         uploadString(storageRef, imageToPost, "data_url").then((snapshot) => {
-                //             alert("image Uploaded");
-                //             getDownloadURL(snapshot.ref).then((URL) => {
+                //         const uploadTask = uploadString(storageRef, imageToPost, "data_url");
+                //         alert("image Uploaded");
+                //         uploadTask.onSnapshot(dbRef.STATE_CHANGED,
+                //             (error) => {
+                //                 alert(error);
+                //             },
+                //             () => {
+                //                     getDownloadURL(uploadTask.snapshot.ref).then((URL) => {
                 //                 setDoc(
                 //                     doc(db, "posts", document.id),
                 //                     { postImage: URL },
@@ -77,16 +79,14 @@ function InputBox() {
                 //             });
                 //             removeImage();
                 //         });
-                //     }
-                // });
-            }
-        })
+
+    
         
 
         inputRef.current.value ="";
 
-        
-    }
+      }  
+    
 
     const addImageToPost = (e)=>{
         console.log(e.target.value.name)
