@@ -1,16 +1,14 @@
 import StoryCard from "./StoryCard"
+import '../public/imagefull.jpeg'
+import '../public/profpix.jpeg'
 
 const stories = [
     {
         name: "Cool Modext",
-        src:"https://links.papareact.com/zof",
-        profile: "https://links.papareact.com/l4v"
+        src: '/../public/imagefull.jpeg',
+        profile: '/../public/profpix.jpeg'
     },
-    {
-        name: "Elon Musk",
-        src:"https://links.papareact.com/4zn",
-        profile: "https://links.papareact.com/kxk"
-    },
+    
     {
         name: "Jeff Bezoz",
         src:"https://links.papareact.com/k2j",
@@ -20,6 +18,11 @@ const stories = [
         name: "Mark Zuckerberg",
         src:"https://links.papareact.com/xql",
         profile: "https://links.papareact.com/snf"
+    },
+    {
+        name: "Elon Musk",
+        src:"https://links.papareact.com/4zn",
+        profile: "https://links.papareact.com/kxk"
     },
     {
         name: "Bill Gates",
